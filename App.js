@@ -5,20 +5,27 @@ export default class App extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {location: null, positions: []}
+        this.state = {location: null, positions: [], watchId: null}
     }
 
     componentDidMount = () => {
         //Do something with the positions. for example draw a route
-        navigator.geolocation.watchPosition(position => {
-            //Position changed
-             let positions = this.state.positions;
+        let watchId = navigator.geolocation.watchPosition(position => {
+                console.log("updated...");
+                //Position changed
+                let positions = this.state.positions;
                 positions.push(position);
                 this.setState({positions: positions});
             },
             error => {
                 console.log("error: ", error)
-            })
+            },
+            {enableHighAccuracy: true});
+        this.setState({watchId});
+    };
+
+    componentWillUnmount = () => {
+        navigator.geolocation.clearWatch(this.state.watchId);
     };
 
     findCoordinates = () => {
@@ -41,6 +48,7 @@ export default class App extends Component {
                         <Text style={styles.result}>Longitude: {this.state.location.coords.longitude} </Text>
                     </View>}
                 </TouchableOpacity>
+                <Text>{this.state.positions.length}</Text>
             </View>
         );
     }
