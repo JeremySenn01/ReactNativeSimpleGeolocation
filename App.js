@@ -5,8 +5,21 @@ export default class App extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {location: null, newPosition: null}
+        this.state = {location: null, positions: []}
     }
+
+    componentDidMount = () => {
+        //Do something with the positions. for example draw a route
+        navigator.geolocation.watchPosition(position => {
+            //Position changed
+             let positions = this.state.positions;
+                positions.push(position);
+                this.setState({positions: positions});
+            },
+            error => {
+                console.log("error: ", error)
+            })
+    };
 
     findCoordinates = () => {
         navigator.geolocation.getCurrentPosition(
@@ -15,22 +28,18 @@ export default class App extends Component {
             },
             error => console.log("couldn't get Location")
         );
-
-        let watchId = navigator.geolocation.watchPosition(position => {
-                this.setState({newPosition: position});
-            },
-            error => {
-                console.log("error: ", error)
-            })
     };
 
     render() {
         return (
             <View style={styles.container}>
                 <TouchableOpacity onPress={this.findCoordinates}>
-                    <Text style={styles.introText}>Find my Coordinates You faking bitch</Text>
-                    {this.state.location && <Text
-                        style={styles.result}>Location: {this.state.location.coords.latitude} / {this.state.location.coords.longitude} </Text>}
+                    <Text style={styles.introText}>Gimme Location pls</Text>
+                    {this.state.location &&
+                    <View style={styles.resultContainer}>
+                        <Text style={styles.result}>Latitude: {this.state.location.coords.latitude}</Text>
+                        <Text style={styles.result}>Longitude: {this.state.location.coords.longitude} </Text>
+                    </View>}
                 </TouchableOpacity>
             </View>
         );
@@ -49,10 +58,13 @@ const styles = StyleSheet.create({
         fontSize: 40
     },
     result: {
-        color: "white",
-        fontSize: 30
+        color: "red",
+        fontSize: 20
     },
     countText: {
         color: "white"
+    },
+    resultContainer: {
+        marginTop: 20,
     }
 });
